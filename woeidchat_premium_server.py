@@ -397,10 +397,28 @@ app = FastAPI(title="WoeidChat Premium", version="3.0", lifespan=lifespan)
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
 # Serve static files
-try:
-    app.mount("/static", StaticFiles(directory="static"), name="static")
-except Exception:
-    pass
+static_dir = Path(__file__).parent / "static"
+if static_dir.exists():
+    app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
+    print(f"✅ Static files mounted from: {static_dir}")
+else:
+    print(f"⚠️ Static directory not found at: {static_dir}")
+
+
+# ─── Root Endpoint ────────────────────────────────────────────────────
+
+@app.get("/")
+def root():
+    """Root endpoint - redirects to login"""
+    return {"message": "WoeidChat Premium Server v3.0 is running! ✅", "login": "/static/login.html"}
+
+
+# ─── Health Check ─────────────────────────────────────────────────────
+
+@app.get("/health")
+def health():
+    """Health check endpoint"""
+    return {"status": "healthy", "service": "WoeidChat Premium"}
 
 
 # ─── Utility Functions ──────────────────────────────────────────────────

@@ -567,6 +567,7 @@
         }
         
         const API_URL = getApiUrl();
+        console.log('API Base URL:', API_URL);
 
         // Login handler
         async function handleLogin() {
@@ -582,19 +583,29 @@
                 const response = await fetch(`${API_URL}/auth/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    mode: 'cors',
+                    credentials: 'omit',
                     body: JSON.stringify({ username, password })
                 });
 
-                const data = await response.json();
-
-                if (data.success) {
-                    localStorage.setItem('token', data.token);
-                    showAlert('Login successful! Redirecting...', 'success');
-                    setTimeout(() => window.location.href = '/static/dashboard.html', 1500);
-                } else {
-                    showAlert(data.detail || 'Login failed', 'error');
+                console.log('Login response status:', response.status);
+                const text = await response.text();
+                console.log('Login response:', text);
+                
+                try {
+                    const data = JSON.parse(text);
+                    if (data.success) {
+                        localStorage.setItem('token', data.token);
+                        showAlert('Login successful! Redirecting...', 'success');
+                        setTimeout(() => window.location.href = '/static/dashboard.html', 1500);
+                    } else {
+                        showAlert(data.detail || 'Login failed', 'error');
+                    }
+                } catch (e) {
+                    showAlert('Server error: Invalid response', 'error');
                 }
             } catch (error) {
+                console.error('Login error:', error);
                 showAlert('Connection error: ' + error.message, 'error');
             }
         }
@@ -621,6 +632,8 @@
                 const response = await fetch(`${API_URL}/auth/register`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    mode: 'cors',
+                    credentials: 'omit',
                     body: JSON.stringify({
                         username,
                         email,
@@ -630,15 +643,23 @@
                     })
                 });
 
-                const data = await response.json();
-
-                if (data.success) {
-                    showAlert('Account created! Please login', 'success');
-                    setTimeout(() => switchTab('login'), 1500);
-                } else {
-                    showAlert(data.detail || 'Registration failed', 'error');
+                console.log('Register response status:', response.status);
+                const text = await response.text();
+                console.log('Register response:', text);
+                
+                try {
+                    const data = JSON.parse(text);
+                    if (data.success) {
+                        showAlert('Account created! Please login', 'success');
+                        setTimeout(() => switchTab('login'), 1500);
+                    } else {
+                        showAlert(data.detail || 'Registration failed', 'error');
+                    }
+                } catch (e) {
+                    showAlert('Server error: Invalid response', 'error');
                 }
             } catch (error) {
+                console.error('Register error:', error);
                 showAlert('Connection error: ' + error.message, 'error');
             }
         }
@@ -653,16 +674,25 @@
             }
 
             try {
-                const response = await fetch(`${API_URL}/forgot-password?username=${username}`);
-                const data = await response.json();
-
-                if (data.success) {
-                    document.getElementById('hintText').textContent = data.hint;
-                    document.getElementById('hintResult').style.display = 'block';
-                } else {
-                    showAlert('User not found', 'error');
+                const response = await fetch(`${API_URL}/forgot-password?username=${username}`, {
+                    mode: 'cors',
+                    credentials: 'omit'
+                });
+                
+                const text = await response.text();
+                try {
+                    const data = JSON.parse(text);
+                    if (data.success) {
+                        document.getElementById('hintText').textContent = data.hint;
+                        document.getElementById('hintResult').style.display = 'block';
+                    } else {
+                        showAlert('User not found', 'error');
+                    }
+                } catch (e) {
+                    showAlert('Server error: Invalid response', 'error');
                 }
             } catch (error) {
+                console.error('Forgot password error:', error);
                 showAlert('Connection error: ' + error.message, 'error');
             }
         }

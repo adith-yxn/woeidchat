@@ -1155,7 +1155,19 @@
 
         function setupWebSocket() {
             try {
-                app.ws = new WebSocket(`ws://localhost:8765/ws/realtime/${app.token}`);
+                // Get WebSocket URL dynamically
+                const host = window.location.hostname;
+                const port = window.location.port;
+                const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                let wsUrl;
+                
+                if (host === 'localhost' || host === '127.0.0.1') {
+                    wsUrl = `${protocol}//localhost:8000/ws/realtime/${app.token}`;
+                } else {
+                    wsUrl = `${protocol}//${host}/ws/realtime/${app.token}`;
+                }
+                
+                app.ws = new WebSocket(wsUrl);
                 app.ws.onmessage = (event) => {
                     const data = JSON.parse(event.data);
                     console.log('WebSocket message:', data);

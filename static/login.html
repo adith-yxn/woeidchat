@@ -555,6 +555,19 @@
             hideAlert();
         }
 
+        // Get API base URL dynamically
+        function getApiUrl() {
+            const host = window.location.hostname;
+            const port = window.location.port;
+            const protocol = window.location.protocol;
+            if (host === 'localhost' || host === '127.0.0.1') {
+                return `${protocol}//localhost:8000`;
+            }
+            return `${protocol}//${host}`;
+        }
+        
+        const API_URL = getApiUrl();
+
         // Login handler
         async function handleLogin() {
             const username = document.getElementById('loginUsername').value;
@@ -566,7 +579,7 @@
             }
 
             try {
-                const response = await fetch('http://localhost:8765/auth/login', {
+                const response = await fetch(`${API_URL}/auth/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username, password })
@@ -605,7 +618,7 @@
             }
 
             try {
-                const response = await fetch('http://localhost:8765/auth/register', {
+                const response = await fetch(`${API_URL}/auth/register`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -640,7 +653,7 @@
             }
 
             try {
-                const response = await fetch(`http://localhost:8765/forgot-password?username=${username}`);
+                const response = await fetch(`${API_URL}/forgot-password?username=${username}`);
                 const data = await response.json();
 
                 if (data.success) {

@@ -936,4 +936,9 @@ if __name__ == "__main__":
       Features: Premium, Voice/Video, Stickers, Real-time
     ════════════════════════════════════════════════════════════
     """)
-    uvicorn.run(app, host=host, port=port, log_level="info")
+    try:
+        uvicorn.run(app, host=host, port=port, log_level="info")
+    except Exception as e:
+        print(f"❌ Server Error: {e}")
+        import traceback
+        traceback.print_exc()

@@ -28,5 +28,5 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
     CMD curl -f http://localhost:8000/health || exit 1
 
-# Run server with proper PORT handling
-CMD ["python", "-u", "woeidchat_premium_server.py"]
+# Run server with uvicorn directly
+CMD ["python", "-m", "uvicorn", "woeidchat_premium_server:app", "--host", "0.0.0.0", "--port", "8000", "--log-level", "info"]

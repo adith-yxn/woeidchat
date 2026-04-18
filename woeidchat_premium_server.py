@@ -98,8 +98,12 @@ PREMIUM_TIERS = {
 # ─── Database ──────────────────────────────────────────────────────────
 
 def get_db():
-    conn = sqlite3.connect("woeidchat_premium.db", check_same_thread=False)
+    conn = sqlite3.connect("woeidchat_premium.db", check_same_thread=False, timeout=10.0)
     conn.row_factory = sqlite3.Row
+    # Enable WAL mode for better concurrency
+    conn.execute("PRAGMA journal_mode=WAL")
+    conn.execute("PRAGMA synchronous=NORMAL")
+    conn.execute("PRAGMA cache_size=10000")
     return conn
 
 
@@ -395,6 +399,15 @@ app = FastAPI(title="WoeidChat Premium", version="3.0", lifespan=lifespan)
 
 # CORS
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
+
+# Global exception handler
+from fastapi.exceptions import RequestValidationError
+@app.exception_handler(Exception)
+async def general_exception_handler(request, exc):
+    print(f"❌ Error: {exc}")
+    import traceback
+    traceback.print_exc()
+    return JSONResponse(status_code=500, content={"error": str(exc)})
 
 # Serve static files
 static_dir = Path(__file__).parent / "static"

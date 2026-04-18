@@ -909,11 +909,13 @@ async def get_stats(authorization: str = Header(...)):
 
 
 if __name__ == "__main__":
-    print("""
+    port = int(os.getenv("PORT", 8765))
+    host = os.getenv("HOST", "0.0.0.0")
+    print(f"""
     ════════════════════════════════════════════════════════════
       🔐 WoeidChat Premium Server v3.0
-      Listening on http://0.0.0.0:8765
+      Listening on http://{host}:{port}
       Features: Premium, Voice/Video, Stickers, Real-time
     ════════════════════════════════════════════════════════════
     """)
-    uvicorn.run(app, host="0.0.0.0", port=8765, log_level="info")
+    uvicorn.run(app, host=host, port=port, log_level="info")

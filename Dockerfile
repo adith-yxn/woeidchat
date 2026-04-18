@@ -14,13 +14,12 @@ COPY requirements.txt .
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt gunicorn uvicorn
 
-# Create necessary directories
+# Create necessary directories (uploads is runtime-created)
 RUN mkdir -p woeidchat_keys uploads
 
 # Copy application and assets
 COPY woeidchat_premium_server.py .
 COPY static/ ./static/
-COPY uploads/ ./uploads/
 
 # Expose port (Fly.io will use PORT env var)
 EXPOSE 8000

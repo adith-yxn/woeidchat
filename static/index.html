@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WoeidChat - Premium Messaging</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #075e54;
+            --primary-dark: #054a40;
+            --accent: #25d366;
+            --accent-light: #31a24c;
+            --secondary: #128c7e;
+            --bg: #ffffff;
+            --bg-dark: #ecf0f1;
+            --text: #000000;
+            --text-light: #666666;
+            --border: #e0e0e0;
+            --premium: #ffc107;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+            background: var(--bg);
+        }
+
+        /* ─── Sidebar ─── */
+        .sidebar {
+            width: 360px;
+            background: var(--bg);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .sidebar-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+        }
+
+        .sidebar-header h1 {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .icon-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s;
+        }
+
+        .icon-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .search-box {
+            padding: 10px 15px;
+            background: var(--bg-dark);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 15px;
+            border: none;
+            border-radius: 20px;
+            background: white;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .chats-list {
+            flex: 1;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+
+        .chat-item {
+            padding: 12px 8px;
+            margin: 0 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+        }
+
+        .chat-item:hover {
+            background: var(--bg-dark);
+        }
+
+        .chat-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--secondary) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .chat-info {
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .chat-name {
+            font-weight: 600;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chat-preview {
+            font-size: 12px;
+            color: var(--text-light);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-top: 3px;
+        }
+
+        .chat-time {
+            font-size: 12px;
+            color: var(--text-light);
+            white-space: nowrap;
+        }
+
+        .online-indicator {
+            width: 12px;
+            height: 12px;
+            background: var(--accent);
+            border-radius: 50%;
+            position: absolute;
+            right: 8px;
+            bottom: 8px;
+        }
+
+        .badge {
+            background: var(--accent);
+            color: white;
+            border-radius: 12px;
+            padding: 2px 6px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-left: 8px;
+        }
+
+        /* ─── Chat Area ─── */
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+
+        .chat-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+        }
+
+        .chat-header-info h2 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .chat-header-info p {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .chat-header-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .call-btn {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .call-btn:hover {
+            transform: scale(1.2);
+        }
+
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: #f5f5f5;
+        }
+
+        .message {
+            display: flex;
+            margin-bottom: 8px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.own {
+            justify-content: flex-end;
+        }
+
+        .message-bubble {
+            max-width: 55%;
+            padding: 8px 12px;
+            border-radius: 18px;
+            word-wrap: break-word;
+            font-size: 14px;
+            line-height: 1.4;
+            position: relative;
+        }
+
+        .message.own .message-bubble {
+            background: var(--accent);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message:not(.own) .message-bubble {
+            background: white;
+            color: var(--text);
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: var(--text-light);
+            margin-top: 3px;
+            text-align: right;
+        }
+
+        .message.own .message-time {
+            color: rgba(255,255,255,0.7);
+        }
+
+        .read-receipt {
+            font-size: 10px;
+            margin-left: 3px;
+        }
+
+        .typing-indicator {
+            display: flex;
+            gap: 3px;
+            padding: 8px 12px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--text-light);
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% { opacity: 0.5; transform: translateY(0); }
+            30% { opacity: 1; transform: translateY(-10px); }
+        }
+
+        /* ─── Input Area ─── */
+        .input-area {
+            padding: 12px 20px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        .input-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            background: transparent;
+            border: none;
+            color: var(--accent);
+            font-size: 20px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .action-btn:hover {
+            transform: scale(1.2);
+        }
+
+        .message-input {
+            flex: 1;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 10px 15px;
+            font-size: 14px;
+            outline: none;
+            resize: none;
+            max-height: 100px;
+            font-family: inherit;
+        }
+
+        .message-input:focus {
+            border-color: var(--accent);
+        }
+
+        .send-btn {
+            background: transparent;
+            border: none;
+            color: var(--accent);
+            font-size: 20px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.2);
+        }
+
+        /* ─── Modals ─── */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 5px 40px rgba(0,0,0,0.16);
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .modal-header {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-light);
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text);
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: var(--accent);
+        }
+
+        .btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .btn:hover {
+            background: var(--accent-light);
+        }
+
+        .btn-secondary {
+            background: var(--bg-dark);
+            color: var(--text);
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        /* ─── Premium Badge ─── */
+        .premium-badge {
+            background: var(--premium);
+            color: #333;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            display: inline-block;
+            margin-left: 6px;
+        }
+
+        /* ─── Empty State ─── */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--text-light);
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.3;
+        }
+
+        /* ─── Responsive ─── */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                position: absolute;
+                left: -100%;
+                height: 100%;
+                z-index: 100;
+                transition: left 0.3s;
+            }
+
+            .sidebar.active {
+                left: 0;
+            }
+
+            .container {
+                flex-direction: column;
+            }
+
+            .message-bubble {
+                max-width: 85%;
+            }
+        }
+
+        /* ─── Scrollbar ─── */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- ─── Sidebar ─── -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h1>WoeidChat</h1>
+                <div class="header-actions">
+                    <button class="icon-btn" onclick="showPremium()">⭐</button>
+                    <button class="icon-btn" onclick="showSettings()">⚙️</button>
+                    <button class="icon-btn" onclick="logout()">🚪</button>
+                </div>
+            </div>
+
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search chats..." onkeyup="filterChats()">
+            </div>
+
+            <div class="chats-list" id="chatsList">
+                <!-- Chat items will be populated here -->
+            </div>
+        </div>
+
+        <!-- ─── Chat Area ─── -->
+        <div class="chat-area">
+            <div class="chat-header">
+                <div>
+                    <div class="chat-header-info">
+                        <h2 id="chatName">Select a chat</h2>
+                        <p id="chatStatus">Ready to chat</p>
+                    </div>
+                </div>
+                <div class="chat-header-actions">
+                    <button class="call-btn" onclick="initiateCall('voice')" title="Voice call">☎️</button>
+                    <button class="call-btn" onclick="initiateCall('video')" title="Video call">📹</button>
+                </div>
+            </div>
+
+            <div class="messages" id="messagesContainer">
+                <div class="empty-state">
+                    <div class="empty-state-icon">💬</div>
+                    <p>Select a chat to start messaging</p>
+                </div>
+            </div>
+
+            <div class="input-area">
+                <div class="input-actions">
+                    <button class="action-btn" onclick="attachFile()" title="Attach file">📎</button>
+                    <button class="action-btn" onclick="openStickers()" title="Stickers">😊</button>
+                </div>
+                <input type="text" id="messageInput" class="message-input" placeholder="Type a message..." onkeypress="handleKeyPress(event)">
+                <button class="send-btn" onclick="sendMessage()" title="Send message">➤</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── Premium Modal ─── -->
+    <div class="modal" id="premiumModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closePremium()">×</button>
+            <div class="modal-header">⭐ Upgrade to Premium</div>
+
+            <div style="margin: 20px 0;">
+                <div style="margin-bottom: 20px; padding: 15px; background: #f5f5f5; border-radius: 8px; border-left: 4px solid var(--premium);">
+                    <h3 style="font-size: 16px; margin-bottom: 10px;">Free Plan</h3>
+                    <p>✓ Basic messaging</p>
+                    <p>✓ Groups up to 100 members</p>
+                    <p>✓ 1GB storage</p>
+                    <p>✗ No voice/video calls</p>
+                    <p style="margin-top: 10px; font-weight: bold; color: var(--accent);">$0/month</p>
+                </div>
+
+                <div style="margin-bottom: 20px; padding: 15px; background: #f5f5f5; border-radius: 8px; border-left: 4px solid var(--accent);">
+                    <h3 style="font-size: 16px; margin-bottom: 10px;">Pro Plan 🌟</h3>
+                    <p>✓ Unlimited messaging</p>
+                    <p>✓ Groups up to 500 members</p>
+                    <p>✓ 50GB storage</p>
+                    <p>✓ Voice & video calls</p>
+                    <p>✓ Premium stickers</p>
+                    <p>✓ Ad-free experience</p>
+                    <p style="margin-top: 10px; font-weight: bold; color: var(--accent);">$2.99/month</p>
+                </div>
+
+                <div style="margin-bottom: 20px; padding: 15px; background: #f5f5f5; border-radius: 8px; border-left: 4px solid var(--premium);">
+                    <h3 style="font-size: 16px; margin-bottom: 10px;">Business Plan 👔</h3>
+                    <p>✓ Everything in Pro</p>
+                    <p>✓ 500GB storage</p>
+                    <p>✓ API access</p>
+                    <p>✓ Team management</p>
+                    <p>✓ Analytics dashboard</p>
+                    <p>✓ 24/7 priority support</p>
+                    <p style="margin-top: 10px; font-weight: bold; color: var(--premium);">$9.99/month</p>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="closePremium()">Later</button>
+                <button class="btn" onclick="upgradePlan('pro')">Upgrade Pro</button>
+                <button class="btn" style="background: var(--premium); color: #333;" onclick="upgradePlan('business')">Upgrade Business</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── Settings Modal ─── -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeSettings()">×</button>
+            <div class="modal-header">⚙️ Settings</div>
+
+            <div class="form-group">
+                <label>Profile Information</label>
+                <input type="text" placeholder="Username" value="john_doe">
+            </div>
+
+            <div class="form-group">
+                <label>Status Message</label>
+                <input type="text" placeholder="Your status..." value="Building cool stuff 🚀">
+            </div>
+
+            <div class="form-group">
+                <label>Notifications</label>
+                <input type="checkbox" checked> Enable message notifications<br>
+                <input type="checkbox" checked> Enable call notifications
+            </div>
+
+            <div class="form-group">
+                <label>Theme</label>
+                <select style="width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit;">
+                    <option>Light Theme</option>
+                    <option>Dark Theme</option>
+                    <option>Auto</option>
+                </select>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="closeSettings()">Close</button>
+                <button class="btn" onclick="saveSettings()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── Stickers Modal ─── -->
+    <div class="modal" id="stickersModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeStickers()">×</button>
+            <div class="modal-header">😊 Stickers Store</div>
+
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; max-height: 400px; overflow-y: auto;">
+                <div style="text-align: center; cursor: pointer; padding: 10px; border-radius: 8px; hover:background: var(--bg-dark);">😀</div>
+                <div style="text-align: center; cursor: pointer; padding: 10px; border-radius: 8px;">😂</div>
+                <div style="text-align: center; cursor: pointer; padding: 10px; border-radius: 8px;">❤️</div>
+                <div style="text-align: center; cursor: pointer; padding: 10px; border-radius: 8px;">🔥</div>
+                <div style="text-align: center; cursor: pointer; padding: 10px; border-radius: 8px;">👍</div>
+                <div style="text-align: center; cursor: pointer; padding: 10px; border-radius: 8px;">🎉</div>
+                <div style="text-align: center; cursor: pointer; padding: 10px; border-radius: 8px;">🚀</div>
+                <div style="text-align: center; cursor: pointer; padding: 10px; border-radius: 8px;">✨</div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="closeStickers()">Close</button>
+                <button class="btn" onclick="buyStickers()">Buy Premium Stickers</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // App State
+        const app = {
+            token: localStorage.getItem('token'),
+            currentUser: null,
+            currentChat: null,
+            chats: [],
+            messages: {}
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!app.token) {
+                redirectToLogin();
+                return;
+            }
+
+            loadChats();
+            setupWebSocket();
+        });
+
+        // Setup WebSocket
+        function setupWebSocket() {
+            const ws = new WebSocket(`ws://localhost:8765/ws/realtime/${app.token}`);
+            
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                handleRealtimeMessage(data);
+            };
+
+            ws.onerror = () => console.error('WebSocket error');
+            ws.onclose = () => {
+                // Reconnect after 3 seconds
+                setTimeout(setupWebSocket, 3000);
+            };
+        }
+
+        // Load chats
+        async function loadChats() {
+            // Mock chats for demo
+            app.chats = [
+                { id: 1, name: 'Alice Johnson', avatar: 'AJ', online: true, preview: 'See you later!' },
+                { id: 2, name: 'Tech Team', avatar: '👥', online: false, preview: 'Meeting at 3pm' },
+                { id: 3, name: 'Bob Smith', avatar: 'BS', online: true, preview: '👍' }
+            ];
+
+            renderChats();
+        }
+
+        // Render chats
+        function renderChats() {
+            const chatsList = document.getElementById('chatsList');
+            chatsList.innerHTML = app.chats.map(chat => `
+                <div class="chat-item" onclick="selectChat(${chat.id})">
+                    <div class="chat-avatar">${chat.avatar}</div>
+                    <div class="chat-info">
+                        <div class="chat-name">${chat.name}</div>
+                        <div class="chat-preview">${chat.preview}</div>
+                    </div>
+                    ${chat.online ? '<div class="online-indicator"></div>' : ''}
+                    ${chat.unread ? `<span class="badge">${chat.unread}</span>` : ''}
+                    <div class="chat-time">10:30</div>
+                </div>
+            `).join('');
+        }
+
+        // Select chat
+        function selectChat(id) {
+            app.currentChat = app.chats.find(c => c.id === id);
+            document.getElementById('chatName').textContent = app.currentChat.name;
+            document.getElementById('chatStatus').textContent = app.currentChat.online ? 'Online' : 'Offline';
+            loadMessages();
+        }
+
+        // Load messages
+        function loadMessages() {
+            const container = document.getElementById('messagesContainer');
+            const messages = [
+                { own: false, text: 'Hey, how are you?', time: '10:20' },
+                { own: true, text: 'I\'m good! Just working on some new features 🚀', time: '10:21' },
+                { own: false, text: 'That\'s amazing! Tell me more...', time: '10:22' },
+                { own: true, text: 'It\'s a premium messaging app with voice/video calls, stickers, and more!', time: '10:23' }
+            ];
+
+            container.innerHTML = messages.map(msg => `
+                <div class="message ${msg.own ? 'own' : ''}">
+                    <div style="display: flex; flex-direction: column;">
+                        <div class="message-bubble">${msg.text}</div>
+                        <div class="message-time">${msg.time} ${msg.own ? '✓✓' : ''}</div>
+                    </div>
+                </div>
+            `).join('');
+
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // Send message
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const text = input.value.trim();
+
+            if (!text) return;
+
+            // Add message to UI
+            const container = document.getElementById('messagesContainer');
+            const msgElement = document.createElement('div');
+            msgElement.className = 'message own';
+            msgElement.innerHTML = `
+                <div style="display: flex; flex-direction: column;">
+                    <div class="message-bubble">${text}</div>
+                    <div class="message-time">just now</div>
+                </div>
+            `;
+            container.appendChild(msgElement);
+            container.scrollTop = container.scrollHeight;
+
+            input.value = '';
+
+            // Send via WebSocket
+            // ws.send(JSON.stringify({ type: 'message', content: text }));
+        }
+
+        // Handle key press
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        // Filter chats
+        function filterChats() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            document.querySelectorAll('.chat-item').forEach(item => {
+                const name = item.querySelector('.chat-name').textContent.toLowerCase();
+                item.style.display = name.includes(query) ? '' : 'none';
+            });
+        }
+
+        // Premium
+        function showPremium() { document.getElementById('premiumModal').classList.add('active'); }
+        function closePremium() { document.getElementById('premiumModal').classList.remove('active'); }
+
+        function upgradePlan(tier) {
+            alert(`Upgrade to ${tier.toUpperCase()} plan processing...`);
+            closePremium();
+        }
+
+        // Settings
+        function showSettings() { document.getElementById('settingsModal').classList.add('active'); }
+        function closeSettings() { document.getElementById('settingsModal').classList.remove('active'); }
+        function saveSettings() { alert('Settings saved!'); closeSettings(); }
+
+        // Stickers
+        function openStickers() { document.getElementById('stickersModal').classList.add('active'); }
+        function closeStickers() { document.getElementById('stickersModal').classList.remove('active'); }
+        function buyStickers() { alert('Opening sticker store...'); }
+
+        // Calls
+        function initiateCall(type) {
+            alert(`Initiating ${type} call with ${app.currentChat.name}...`);
+        }
+
+        // File
+        function attachFile() {
+            alert('File attachment coming soon...');
+        }
+
+        // Logout
+        function logout() {
+            localStorage.removeItem('token');
+            window.location.href = '/login.html';
+        }
+
+        // Login redirect
+        function redirectToLogin() {
+            window.location.href = '/login.html';
+        }
+
+        // Real-time message handler
+        function handleRealtimeMessage(data) {
+            const type = data.type;
+
+            if (type === 'message') {
+                // Handle incoming message
+            } else if (type === 'typing') {
+                // Show typing indicator
+            } else if (type === 'incoming_call') {
+                // Show call notification
+            }
+        }
+    </script>
+</body>
+</html>
